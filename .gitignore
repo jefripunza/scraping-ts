@@ -183,4 +183,3 @@ app.exe
 /*.png
 deno.lock
 *.exe
-*.json
