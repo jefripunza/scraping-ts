@@ -32,6 +32,7 @@ puppeteer.use(StealthPlugin());
 
 const is_headless = (await question("Headless (y/n): ")) === "y";
 const browser = await puppeteer.launch({
+  // executablePath: "/usr/bin/chromium-browser",
   headless: is_headless,
   acceptInsecureCerts: true,
   args: [
