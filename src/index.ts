@@ -1,5 +1,6 @@
 import {
   axios,
+  fs,
   puppeteerExtra,
   StealthPlugin,
   type PuppeteerNode,
@@ -29,8 +30,9 @@ const puppeteer = puppeteerExtra as unknown as PuppeteerNode & {
 // Tambahkan plugin stealth
 puppeteer.use(StealthPlugin());
 
+const is_headless = (await question("Headless (y/n): ")) === "y";
 const browser = await puppeteer.launch({
-  headless: false,
+  headless: is_headless,
   acceptInsecureCerts: true,
   args: [
     "--disable-geolocation",
@@ -49,15 +51,43 @@ if (Object.keys(project.options?.extra_headers || {}).length > 0) {
 }
 await page.goto(project.url); // buka halaman project
 
+let data: any = {};
 const scrape = await project.scrape_cb(browser, page); // eksekusi scrape
-console.log({ scrape });
+if (typeof scrape === "object" && Array.isArray(scrape)) {
+  data = scrape;
+} else {
+  data = { ...scrape };
+}
+// console.log(1, { data });
 
-await Bun.write(
-  `./${project.name.toLowerCase()}.json`,
-  JSON.stringify(scrape, null, 2)
-);
+if (project.processing_cb !== undefined) {
+  const processing = await project.processing_cb(scrape); // eksekusi processing
+  if (typeof processing === "object" && Array.isArray(processing)) {
+    data = processing;
+  } else if (typeof processing === "undefined") {
+    console.log("✅ Skip processing");
+  } else {
+    data = { ...processing };
+  }
+}
+// console.log(2, { data });
 
-const processing = await project.processing_cb(scrape); // eksekusi processing
-console.log({ processing });
+let export_to = "json";
+if (project.options?.export_to) {
+  export_to = project.options.export_to;
+}
+
+if (fs.existsSync("./data") === false) {
+  fs.mkdirSync("./data");
+}
+
+if (export_to === "json") {
+  await Bun.write(
+    `./data/${project.name.toLowerCase()}.json`,
+    JSON.stringify(data, null, 2)
+  );
+}
+
+console.log("✅ Scrape Done!");
 
 // await browser.close();

@@ -183,3 +183,4 @@ app.exe
 /*.png
 deno.lock
 *.exe
+/data

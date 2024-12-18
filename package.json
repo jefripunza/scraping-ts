@@ -3,8 +3,11 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "start": "bun run ./src/index.ts",
+    "start:build": "deno run -A --unstable-node-globals ./dist/index.js",
     "dev": "bun run --watch ./src/index.ts",
-    "build": "bun build --compile --outfile mycli ./src/index.ts"
+    "build": "bun build --target node --outdir ./dist ./src/index.ts",
+    "compile": "bun build --compile --outfile cli ./src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,6 +19,9 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "overrides": {
+    "clone-deep": "^4.0.1"
   },
   "dependencies": {
     "axios": "1.7.7",

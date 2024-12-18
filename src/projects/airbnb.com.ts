@@ -14,6 +14,7 @@ interface Data {
 }
 
 project.scrape(async (browser, page): Promise<Data[]> => {
+  await page.waitForSelector("#bigsearch-query-location-input");
   const location = (await question("Typing location: ")) as string;
   await page.type("#bigsearch-query-location-input", location);
   await delay(1000);
@@ -115,10 +116,11 @@ project.scrape(async (browser, page): Promise<Data[]> => {
           address,
         });
       }
+      if (pageNum === limit_page) break;
 
       // Handle next page
       // @ts-ignore
-      const room_code = String(url_save).split("?")[0];
+      // const room_code = String(url_save).split("?")[0];
       const nextButton = document.querySelector("a[aria-label='Next']");
       if (nextButton) {
         // @ts-ignore
@@ -142,6 +144,7 @@ project.scrape(async (browser, page): Promise<Data[]> => {
 
     return result;
   }, limit_page); // Pass limit_page as an argument to the page.evaluate function
+  console.log("✅ Next page done");
 
   results.push(...(data as Data[]));
 
